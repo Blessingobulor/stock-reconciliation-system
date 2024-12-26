@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * Product Class
+ */
+class Product extends Model
+{
+	protected $table = "products";
+
+	protected $allowed_columns = [
+			'product_id',
+			'product_description',
+			'product_category',
+			'qty',
+			'amount',
+			'date',
+			'image',
+			'user_id',
+			'views',
+			];
+
+
+
+			 function generate_product_id()
+    {
+        
+    }
+
+
+/*--------------------------------------------------------------------------------------------------------------------------
+	Validate function: to validate all input
+---------------------------------------------------------------------------------------------------------------------------*/
+	public function validate($data, $id = null)
+	{	
+		$errors = [];
+
+		//validating description Field
+		if (empty($data['product_description'])) 
+		{
+			$errors['product_description'] = "Product description is require_onced"; 
+
+		}elseif(!preg_match('/[a-zA-Z0-9 ]/', $data['product_description'])) 
+		{
+			$errors['product_description'] = "Only letters and numbers are allowed in description";
+		}
+
+		//validating quantity Field
+		if (empty($data['qty'])) 
+		{
+			$errors['qty'] = "Product quantity is require_onced"; 
+
+		}elseif(!preg_match('/[0-9]/', $data['qty'])) 
+		{
+			$errors['qty'] = "Quantity must be a number";
+		}
+
+		//validating Amount Field
+		if (empty($data['amount'])) 
+		{
+			$errors['amount'] = "Product Amount is require_onced"; 
+
+		}elseif(!preg_match('/[1-9.]/', $data['amount'])) 
+		{
+			$errors['amount'] = "Amount must be a number";
+		}
+		
+		//validating Image Field
+		if (!$id || ($id &&  !empty($data['image']))) 
+		{
+			$max_size = 4; //mbs
+			$size = $max_size * (1024 * 1024);
+
+			if (empty($data['image'])) 
+			{
+				$errors['image'] = "Image is require_onced"; 
+
+			}elseif(!($data['image']['type'] == "image/jpeg" || $data['image']['type'] == "image/png" )) 
+			{
+				$errors['image'] = "Image must be a valid JPEG or PNG";
+			
+			}elseif($data['image']['error'] > 0) 
+			{
+				$errors['image'] = "The image failed to upload. Error No.".$data['image']['error'];
+			
+			}elseif($data['image']['size'] > $size) 
+			{
+				$errors['image'] = "The image size must not exceed ".$max_size."Mb";
+			}
+		}
+		
+
+
+ // Validating Product Category Field
+    if (empty($data['product_category'])) 
+    {
+        $errors['product_category'] = "Product category is require_onced";
+    } 
+    elseif (!preg_match('/^[a-zA-Z0-9 ]+$/', $data['product_category'])) 
+    {
+        $errors['product_category'] = "Only letters, numbers, and spaces are allowed in product category";
+    }
+		return $errors;
+	}
+
+
+	function generate_barcode()
+	{
+		return "2222".rand(1000, 999999999);
+	}
+
+
+	function generate_filename($ext = "jpg")
+	{
+		return hash("sha1", rand(1000, 999999999))."_".rand(1000, 9999).".".$ext;
+	}
+}
